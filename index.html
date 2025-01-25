@@ -1,0 +1,554 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+	<meta http-equiv='Content-Type' content='text/html;charset=utf-8'/>
+    <title>ShadowView</title>
+
+	<script type='text/javascript' charset='utf-8' src='scripts/main.js'></script>
+	<script type='text/javascript' charset='utf-8' src='scripts/APP_GlobalData.js'></script>
+	<script type='text/javascript' charset='utf-8' src='scripts/APP_InputActions.js'></script>
+	<script type='text/javascript' charset='utf-8' src='scripts/APP_LoadedActions.js'></script>
+	<script type='text/javascript' charset='utf-8' src='scripts/APP_Loader.js'></script>
+	<script type='text/javascript' charset='utf-8' src='scripts/APP_Renderer.js'></script>
+	<script type='text/javascript' charset='utf-8' src='scripts/objects/APP_CameraControls.js'></script>
+	<script type='text/javascript' charset='utf-8' src='scripts/APP_InputDeviceHandler.js'></script>
+	<script type='text/javascript' charset='utf-8' src='scripts/APP_Util.js'></script>
+	<script type='text/javascript' charset='utf-8' src='scripts/APP_ImageProcessor.js'></script>
+	<script type='text/javascript' charset='utf-8' src='scripts/APP_Parser.js'></script>
+	<script type='text/javascript' charset='utf-8' src='scripts/APP_UpdateManager.js'></script>
+	<script type='text/javascript' charset='utf-8' src='scripts/APP_Geometry.js'></script>
+	<script type='text/javascript' charset='utf-8' src='scripts/APP_Scheduler.js'></script>
+	<script type='text/javascript' charset='utf-8' src='scripts/objects/APP_RawImageStorage.js'></script>
+	<script type='text/javascript' charset='utf-8' src='scripts/objects/APP_Mesh.js'></script>
+	<script type='text/javascript' charset='utf-8' src='scripts/objects/APP_Camera.js'></script>
+	<script type='text/javascript' charset='utf-8' src='scripts/objects/APP_Image.js'></script>
+	<script type='text/javascript' charset='utf-8' src='scripts/APP_DepthImageFilter.js'></script>
+
+
+	<script type='text/javascript' charset='utf-8' src='lib/three.min.js'></script>
+
+	<script type='text/vertexShader' charset='utf-8' id="vertexShader_SHADOWMAP">
+		precision mediump float;
+
+		//attributes
+		attribute vec3 position;
+		attribute vec3 texColor;
+		attribute vec3 segColor;
+		attribute vec4 distance;
+		attribute vec4 depthDistance;
+
+		//matrices
+		uniform mat4 modelViewMatrix;
+		uniform mat4 projectionMatrix;
+
+		//varyings
+		varying vec3 pass_segColor;
+		varying vec4 pass_distance;
+		varying vec4 pass_depthDistance;
+
+		void main(){
+
+			//passing varyings
+			pass_depthDistance 	= depthDistance;
+			pass_segColor 		= segColor;
+			pass_distance 		= distance;
+
+			//discarding the sky through distance vec
+			if(segColor.r > 0.8 && segColor.g < 0.2 && segColor.b < 0.2){
+				float infinity = 1.0 / 0.0;
+				pass_distance = vec4(infinity,infinity,infinity,infinity);
+			}
+
+			//usual position transformation
+			vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+			gl_Position = projectionMatrix * mvPosition;
+
+		}
+
+	</script>
+
+	<script type='text/fragmentShader' charset='utf-8' id="fragmentShader_SHADOWMAP">
+		precision mediump float;
+
+		//varyings
+		varying vec3 pass_segColor;
+		varying vec4 pass_distance;
+		varying vec4 pass_depthDistance;
+
+		//other uniforms
+		uniform float TDT;
+		uniform float DDT;
+
+		void main(){
+
+			//if the length to the neighbors are to great -> discard
+			if(pass_distance.x > TDT || pass_distance.y > TDT || pass_distance.z > TDT || pass_distance.w > TDT){
+				discard;
+			}
+
+			//if the length to the neighbors are to great -> discard
+			if(pass_depthDistance.x > DDT || pass_depthDistance.y > DDT || pass_depthDistance.z > DDT || pass_depthDistance.w > DDT){
+				discard;
+			}
+
+			float depth = gl_FragCoord.z;
+			gl_FragColor = vec4(depth, depth, depth, 1.0);
+
+		}
+
+	</script>
+
+	<script type='text/vertexShader' charset='utf-8' id="vertexShader_TRIANGLES_SHADOW">
+		precision mediump float;
+
+		//attributes
+		attribute vec3 position;
+		attribute vec2 texCoord;
+		attribute vec3 segColor;
+		attribute vec4 distance;
+		attribute vec3 normal;
+		attribute vec4 depthDistance;
+
+		//matrices
+		uniform mat4 modelViewMatrix;
+		uniform mat4 projectionMatrix;
+		uniform mat3 normalMatrix;
+		uniform mat4 shadowModelViewMatrix;
+		uniform mat4 shadowProjectionMatrix;
+		uniform vec3 lightDirection;
+
+		//varyings
+		varying vec2 pass_texCoord;
+		varying vec3 pass_segColor;
+		varying vec4 pass_distance;
+		varying vec4 pass_shadowPosition;
+		varying vec3 pass_normal;
+		varying vec3 pass_lightDirection;
+		varying vec4 pass_depthDistance;
+
+		void main(){
+
+			//passing varyings
+			pass_depthDistance 		= depthDistance;
+			pass_texCoord 			= texCoord;
+			pass_segColor 			= segColor;
+			pass_distance 			= distance;
+			pass_shadowPosition 	= shadowProjectionMatrix * shadowModelViewMatrix * vec4(position, 1.0);
+			pass_normal   			= normalMatrix * normal;
+			pass_lightDirection 	= (modelViewMatrix * vec4(lightDirection, 1.0)).xyz;
+
+			//discarding the sky through distance vec
+			if(segColor.r > 0.8 && segColor.g < 0.2 && segColor.b < 0.2){
+				float infinity = 1.0 / 0.0;
+				pass_distance = vec4(infinity,infinity,infinity,infinity);
+			}
+
+			//usual position transformation
+			vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+			gl_Position = projectionMatrix * mvPosition;
+		}
+
+	</script>
+
+	<script type='text/fragmentShader' charset='utf-8' id="fragmentShader_TRIANGLES_SHADOW">
+		precision mediump float;
+
+		//varyings
+		varying vec2 pass_texCoord;
+		varying vec3 pass_segColor;
+		varying vec4 pass_distance;
+		varying vec4 pass_shadowPosition;
+		varying vec3 pass_normal;
+		varying vec3 pass_lightDirection;
+		varying vec4 pass_depthDistance;
+
+		//other uniforms
+		uniform float TDT;
+		uniform float DDT;
+		uniform float interpFacSeg;
+		uniform float interpFacDif;
+		uniform float interpFacSdw;
+		uniform sampler2D shadowMap;
+		uniform sampler2D texImage;
+
+
+		vec3 interpolate(vec3 color1, vec3 color2, float interpFac){
+
+			vec3 result = vec3(
+				((1.0-interpFac) * color1.r) + (interpFac * color2.r),
+				((1.0-interpFac) * color1.g) + (interpFac * color2.g),
+				((1.0-interpFac) * color1.b) + (interpFac * color2.b)
+			);
+
+			return result;
+
+		}
+
+		void main(){
+
+			//if the length to the neighbors are to great -> discard
+			if(pass_distance.x > TDT || pass_distance.y > TDT || pass_distance.z > TDT || pass_distance.w > TDT){
+				discard;
+			}
+
+			//if the length to the neighbors are to great -> discard
+			if(pass_depthDistance.x > DDT || pass_depthDistance.y > DDT || pass_depthDistance.z > DDT || pass_depthDistance.w > DDT){
+				discard;
+			}
+
+			//mix texture color and segmentation color
+			vec3 texColor = texture2D(texImage, pass_texCoord).xyz;
+			vec3 color = interpolate(texColor, pass_segColor, interpFacSeg);
+
+			//calculate shadows
+			vec3 projShadowPos = pass_shadowPosition.xyz / pass_shadowPosition.w;
+			projShadowPos = projShadowPos * 0.5 + 0.5;
+
+			float minDepth = texture2D(shadowMap, projShadowPos.xy).z;
+			float currentDepth = projShadowPos.z;
+
+			float shadowFac = 1.0;
+			if(currentDepth > minDepth+0.001){
+				shadowFac = 0.0;
+			}else{
+				shadowFac = 1.0;
+			}
+
+			if(projShadowPos.x > 1.0 && projShadowPos.y > 1.0){
+				shadowFac = 1.0;
+			}
+
+			//calculate diffuse light
+			float diffuseFac = dot(normalize(pass_lightDirection), -normalize(pass_normal));
+			diffuseFac = max(diffuseFac, 0.0);
+
+			//mix color and diffuse light
+			vec3 difColor = interpolate(color, vec3(diffuseFac), interpFacDif);
+
+			//mix color and shadows
+			vec3 shadowColor = interpolate(color, vec3(shadowFac), interpFacSdw);
+			color = min(shadowColor, difColor);
+
+			gl_FragColor = vec4(color, 1.0);
+
+		}
+
+	</script>
+
+	<script type='text/vertexShader' charset='utf-8' id="vertexShader_UV_SHADOW">
+		precision mediump float;
+
+		//attributes
+		attribute vec3 position;
+		attribute vec2 texCoord;
+		attribute vec3 segColor;
+		attribute vec4 distance;
+		attribute vec3 normal;
+		attribute vec4 depthDistance;
+
+		//matrices
+		uniform mat4 modelViewMatrix;
+		uniform mat4 projectionMatrix;
+		uniform mat3 normalMatrix;
+		uniform mat4 shadowModelViewMatrix;
+		uniform mat4 shadowProjectionMatrix;
+		uniform vec3 lightDirection;
+
+		//varyings
+		varying vec2 pass_texCoord;
+		varying vec3 pass_segColor;
+		varying vec4 pass_distance;
+		varying vec4 pass_shadowPosition;
+		varying vec3 pass_normal;
+		varying vec3 pass_lightDirection;
+		varying vec4 pass_depthDistance;
+
+		void main(){
+
+			//passing varyings
+			pass_depthDistance 		= depthDistance;
+			pass_texCoord 			= texCoord;
+			pass_distance 			= distance;
+			pass_shadowPosition 	= shadowProjectionMatrix * shadowModelViewMatrix * vec4(position, 1.0);
+			pass_normal   			= normalMatrix * normal;
+			pass_lightDirection 	= (modelViewMatrix * vec4(lightDirection, 1.0)).xyz;
+
+			//discarding the sky through distance vec
+			if(segColor.r > 0.8 && segColor.g < 0.2 && segColor.b < 0.2){
+				float infinity = 1.0 / 0.0;
+				pass_distance = vec4(infinity,infinity,infinity,infinity);
+			}
+
+			//transform the uv coords into screen space and render everything in texture-space
+			vec2 screenSpaceTextureCoords = vec2((texCoord.x * 2.0) - 1.0, -((texCoord.y * 2.0) - 1.0));
+			gl_Position = vec4(screenSpaceTextureCoords, 0.5, 1.0);
+		}
+
+	</script>
+
+	<script type='text/fragmentShader' charset='utf-8' id="fragmentShader_UV_SHADOW">
+		precision mediump float;
+
+		//varyings
+		varying vec2 pass_texCoord;
+		varying vec4 pass_distance;
+		varying vec4 pass_shadowPosition;
+		varying vec3 pass_normal;
+		varying vec3 pass_lightDirection;
+		varying vec4 pass_depthDistance;
+
+		//other uniforms
+		uniform float TDT;
+		uniform float DDT;
+		uniform float interpFacSeg;
+		uniform float interpFacDif;
+		uniform float interpFacSdw;
+		uniform sampler2D shadowMap;
+		uniform sampler2D texImage;
+
+
+		vec3 interpolate(vec3 color1, vec3 color2, float interpFac){
+
+			vec3 result = vec3(
+				((1.0-interpFac) * color1.r) + (interpFac * color2.r),
+				((1.0-interpFac) * color1.g) + (interpFac * color2.g),
+				((1.0-interpFac) * color1.b) + (interpFac * color2.b)
+			);
+
+			return result;
+
+		}
+
+		void main(){
+
+			//calculate shadows
+			vec3 projShadowPos = pass_shadowPosition.xyz / pass_shadowPosition.w;
+			projShadowPos = projShadowPos * 0.5 + 0.5;
+
+			float minDepth = texture2D(shadowMap, projShadowPos.xy).z;
+			float currentDepth = projShadowPos.z;
+
+			float shadowFac = 1.0;
+			if(currentDepth > minDepth+0.001){
+				shadowFac = 0.0;
+			}else{
+				shadowFac = 1.0;
+			}
+
+			//if the shadowmap does not cover this part -> pretend its light
+			if(projShadowPos.x > 1.0 && projShadowPos.y > 1.0){
+				shadowFac = 1.0;
+			}
+
+			//calculate diffuse light
+			float diffuseFac = dot(normalize(pass_lightDirection), -normalize(pass_normal));
+			if(diffuseFac > 0.0){
+				diffuseFac = 1.0;
+			}else{
+				diffuseFac = 0.0;
+			}
+
+			//assuming there is no triangle (very distorted) -> there is no shadow
+			if(pass_distance.x > TDT || pass_distance.y > TDT || pass_distance.z > TDT || pass_distance.w > TDT){
+				shadowFac = 1.0;
+				diffuseFac = 1.0;
+			}
+
+			if(pass_depthDistance.x > DDT || pass_depthDistance.y > DDT || pass_depthDistance.z > DDT || pass_depthDistance.w > DDT){
+				shadowFac = 1.0;
+				diffuseFac = 1.0;
+			}
+
+			vec3 diffuseColor = vec3(diffuseFac);
+			vec3 shadowColor = vec3(shadowFac);
+			vec3 finalColor = min(shadowColor, diffuseColor);
+
+			gl_FragColor = vec4(finalColor, 1.0);
+
+		}
+
+	</script>
+
+	<script type='text/vertexShader' charset='utf-8' id="vertexShader_SUN">
+		precision mediump float;
+
+		//attributes
+		attribute vec3 position;
+
+		//matrices
+		uniform mat4 modelViewMatrix;
+		uniform mat4 projectionMatrix;
+
+		void main(){
+
+			//usual position transformation
+			vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+			gl_Position = projectionMatrix * mvPosition;
+		}
+
+	</script>
+
+	<script type='text/fragmentShader' charset='utf-8' id="fragmentShader_SUN">
+		precision mediump float;
+
+		void main(){
+
+			gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);
+
+		}
+
+	</script>
+
+</head>
+<body>
+
+	<table style="margin: 0px auto;">
+
+		<tr>
+
+			<td>
+
+				<canvas id="CANVAS" style="background-color: lightgrey; border:1px solid #000;
+										   width: 1024px; height: 512px; ">
+				</canvas>
+
+			</td>
+
+			<td style="vertical-align: top;">
+
+				<fieldset>
+				<legend>Controls</legend>
+
+					<table>
+
+						<tr>
+							<td>Images</td>
+							<td><input id="FILE_INPUT" type="file" accept="*" multiple></td>
+						</tr>
+
+						<tr>
+							<td colspan=2><hr></td>
+						</tr>
+
+						<tr>
+							<td>Display Mesh</td>
+							<td><input type="radio" name="RADIOBUTTON_GROUP_1" id="RADIO_DISPLAY_MESH" onChange="APP_InputActions.displayMeshChanged()" style="width:50%; float: right;" checked></input></td>
+						</tr>
+
+						<tr>
+							<td>Display Shadowmap</td>
+							<td><input type="radio" name="RADIOBUTTON_GROUP_1" id="RADIO_DISPLAY_SHADOWMAP" onChange="APP_InputActions.displayShadowMapChanged()" style="width:50%; float: right;"></input></td>
+						</tr>
+
+						<tr>
+							<td colspan=2><hr></td>
+						</tr>
+
+						<tr>
+							<td>TDT</td>
+							<td><input type="range" min="0" value="5" max="10" id="SLIDER_TDT" step="0.001" style="width:50%; float: right;"></td>
+						</tr>
+
+						<tr>
+							<td>DDT</td>
+							<td><input type="range" min="0" value="5" max="10" id="SLIDER_DDT" step="0.001" style="width:50%; float: right;"></td>
+						</tr>
+
+						<tr>
+							<td>Display Segmentation</td>
+							<td><input type="range" min="0" value="0.5" max="1" id="SLIDER_SEGMENTATION" step="0.001" style="width:50%; float: right;"></input></td>
+						</tr>
+
+						<tr>
+							<td>Display Diffuse</td>
+							<td><input type="range" min="0" value="0.5" max="1" id="SLIDER_DIFFUSE" step="0.001" style="width:50%; float: right;"></input></td>
+						</tr>
+
+						<tr>
+							<td>Display Shadow</td>
+							<td><input type="range" min="0" value="0.5" max="1" id="SLIDER_SHADOW" step="0.001" style="width:50%; float: right;"></input></td>
+						</tr>
+
+						<tr>
+							<td colspan=2><hr></td>
+						</tr>
+
+						<tr>
+							<td>Sun Longitude</td>
+							<td><input type="range" min="0" value="0" max="6.2831853071" id="SLIDER_SUN_X" step="0.001" style="width:50%; float: right;"></input></td>
+						</tr>
+
+						<tr>
+							<td>Sun Latitude</td>
+							<td><input type="range" min="-1.5707963267" value="0" max="1.5707963267" id="SLIDER_SUN_Y" step="0.001" style="width:50%; float: right;"></input></td>
+						</tr>
+
+						<tr>
+							<td colspan=2><hr></td>
+						</tr>
+
+						<tr>
+							<td colspan=1><button type="button" id="BUTTON_SCREENSHOT" style="width:100%;">screenshot</button></td>
+							<td colspan=1><button type="button" id="BUTTON_EXPORT_SHADOWS" style="width:100%;">export shadows</button></td>
+						</tr>
+
+						<tr>
+							<td colspan=2><hr></td>
+						</tr>
+
+						<tr>
+							<td colspan=2> <progress id="PROGRESS_GLOBAL" value="22" max="100" style="width:100%"></progress> </td>
+						</tr>
+
+					</table>
+
+				</fieldset>
+
+			</td>
+
+		</tr>
+
+		<tr>
+
+			<td colspan="2">
+
+			<button type="button" id="BUTTON_HIDE_SHOW_INFO" style="margin-bottom:5px" onclick="document.getElementById('FIELDSET_CAM_CON').hidden = !document.getElementById('FIELDSET_CAM_CON').hidden;
+																								document.getElementById('FIELDSET_NOTES').hidden = !document.getElementById('FIELDSET_NOTES').hidden;">show/hide Information</button>
+
+			<fieldset id="FIELDSET_CAM_CON" hidden>
+				<legend>Camera Controls</legend>
+
+					Click inside canvas to enable mouse controlled first-person view. Move with W, A, S and D.
+					Use SpaceBar to accend and C to decent. Use Mousewheel to increase or decrease movement speed. </br>
+					Exit the view control by pressing Esc.
+
+				</fieldset>
+
+			<td>
+
+		</tr>
+
+		<tr>
+
+		<td colspan="2">
+
+			<fieldset id="FIELDSET_NOTES" hidden>
+				<legend>Notes</legend>
+
+					When opening files, a set of color, depth and binary segmentation data has to be loaded together.
+					The files have several identifiers in their names. </br>
+					"&ltfilename&gt_&ltalpha&gt_&ltbeta&gt_&ltcolor/depth/seg&gt.&ltpng/jpg/bin&gt" The &ltfilename&gt is abitrary and alpha and beta
+					describe the relative location in degrees.
+
+				</fieldset>
+
+			<td>
+
+		</tr>
+
+	</table>
+
+</body>
+
+</html>
