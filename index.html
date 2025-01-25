@@ -27,7 +27,7 @@
 
 
 	<script type='text/javascript' charset='utf-8' src='lib/three.min.js'></script>
-
+	
 	<script type='text/vertexShader' charset='utf-8' id="vertexShader_SHADOWMAP">
 		precision mediump float;
 
@@ -403,151 +403,79 @@
 </head>
 <body>
 
-	<table style="margin: 0px auto;">
-
+	<table style="margin: 0 auto; width: 100%; text-align: center;">
+		<!-- Row 1: Canvas -->
 		<tr>
-
-			<td>
-
-				<canvas id="CANVAS" style="background-color: lightgrey; border:1px solid #000;
-										   width: 1024px; height: 512px; ">
+			<td style="text-align: center;">
+				<canvas id="CANVAS" style="background-color: lightgrey; border:1px solid #000; width: 512px; height: 512px;">
 				</canvas>
-
 			</td>
-
-			<td style="vertical-align: top;">
-
+		</tr>
+	
+		<!-- Row 2: Controls -->
+		<tr>
+			<td>
 				<fieldset>
-				<legend>Controls</legend>
-
-					<table>
-
+					<legend>Controls</legend>
+					<table style="width: 100%; margin: auto;">
 						<tr>
 							<td>Images</td>
 							<td><input id="FILE_INPUT" type="file" accept="*" multiple></td>
 						</tr>
-
-						<tr>
-							<td colspan=2><hr></td>
-						</tr>
-
+						<tr><td colspan="2"><hr></td></tr>
 						<tr>
 							<td>Display Mesh</td>
-							<td><input type="radio" name="RADIOBUTTON_GROUP_1" id="RADIO_DISPLAY_MESH" onChange="APP_InputActions.displayMeshChanged()" style="width:50%; float: right;" checked></input></td>
+							<td><input type="radio" name="RADIOBUTTON_GROUP_1" id="RADIO_DISPLAY_MESH" onChange="APP_InputActions.displayMeshChanged()" checked></td>
 						</tr>
-
 						<tr>
 							<td>Display Shadowmap</td>
-							<td><input type="radio" name="RADIOBUTTON_GROUP_1" id="RADIO_DISPLAY_SHADOWMAP" onChange="APP_InputActions.displayShadowMapChanged()" style="width:50%; float: right;"></input></td>
+							<td><input type="radio" name="RADIOBUTTON_GROUP_1" id="RADIO_DISPLAY_SHADOWMAP" onChange="APP_InputActions.displayShadowMapChanged()"></td>
 						</tr>
-
-						<tr>
-							<td colspan=2><hr></td>
-						</tr>
-
+						<tr><td colspan="2"><hr></td></tr>
 						<tr>
 							<td>TDT</td>
-							<td><input type="range" min="0" value="5" max="10" id="SLIDER_TDT" step="0.001" style="width:50%; float: right;"></td>
+							<td><input type="range" min="0" value="5" max="10" id="SLIDER_TDT" step="0.001"></td>
 						</tr>
-
 						<tr>
 							<td>DDT</td>
-							<td><input type="range" min="0" value="5" max="10" id="SLIDER_DDT" step="0.001" style="width:50%; float: right;"></td>
+							<td><input type="range" min="0" value="5" max="10" id="SLIDER_DDT" step="0.001"></td>
 						</tr>
-
 						<tr>
 							<td>Display Segmentation</td>
-							<td><input type="range" min="0" value="0.5" max="1" id="SLIDER_SEGMENTATION" step="0.001" style="width:50%; float: right;"></input></td>
+							<td><input type="range" min="0" value="0.5" max="1" id="SLIDER_SEGMENTATION" step="0.001"></td>
 						</tr>
-
 						<tr>
 							<td>Display Diffuse</td>
-							<td><input type="range" min="0" value="0.5" max="1" id="SLIDER_DIFFUSE" step="0.001" style="width:50%; float: right;"></input></td>
+							<td><input type="range" min="0" value="0.5" max="1" id="SLIDER_DIFFUSE" step="0.001"></td>
 						</tr>
-
 						<tr>
 							<td>Display Shadow</td>
-							<td><input type="range" min="0" value="0.5" max="1" id="SLIDER_SHADOW" step="0.001" style="width:50%; float: right;"></input></td>
+							<td><input type="range" min="0" value="0.5" max="1" id="SLIDER_SHADOW" step="0.001"></td>
 						</tr>
-
-						<tr>
-							<td colspan=2><hr></td>
-						</tr>
-
+						<tr><td colspan="2"><hr></td></tr>
 						<tr>
 							<td>Sun Longitude</td>
-							<td><input type="range" min="0" value="0" max="6.2831853071" id="SLIDER_SUN_X" step="0.001" style="width:50%; float: right;"></input></td>
+							<td><input type="range" min="0" value="0" max="6.2831853071" id="SLIDER_SUN_X" step="0.001"></td>
 						</tr>
-
 						<tr>
 							<td>Sun Latitude</td>
-							<td><input type="range" min="-1.5707963267" value="0" max="1.5707963267" id="SLIDER_SUN_Y" step="0.001" style="width:50%; float: right;"></input></td>
+							<td><input type="range" min="-1.5707963267" value="0" max="1.5707963267" id="SLIDER_SUN_Y" step="0.001"></td>
 						</tr>
-
+						<tr><td colspan="2"><hr></td></tr>
 						<tr>
-							<td colspan=2><hr></td>
+							<td colspan="1"><button type="button" id="BUTTON_SCREENSHOT" style="width:100%;">Screenshot</button></td>
+							<td colspan="1"><button type="button" id="BUTTON_EXPORT_SHADOWS" style="width:100%;">Export Shadows</button></td>
 						</tr>
-
+						<tr><td colspan="2"><hr></td></tr>
 						<tr>
-							<td colspan=1><button type="button" id="BUTTON_SCREENSHOT" style="width:100%;">screenshot</button></td>
-							<td colspan=1><button type="button" id="BUTTON_EXPORT_SHADOWS" style="width:100%;">export shadows</button></td>
+							<td colspan="2"><progress id="PROGRESS_GLOBAL" value="22" max="100" style="width:100%"></progress></td>
 						</tr>
-
-						<tr>
-							<td colspan=2><hr></td>
-						</tr>
-
-						<tr>
-							<td colspan=2> <progress id="PROGRESS_GLOBAL" value="22" max="100" style="width:100%"></progress> </td>
-						</tr>
-
 					</table>
-
 				</fieldset>
-
 			</td>
-
 		</tr>
-
-		<tr>
-
-			<td colspan="2">
-
-			<button type="button" id="BUTTON_HIDE_SHOW_INFO" style="margin-bottom:5px" onclick="document.getElementById('FIELDSET_CAM_CON').hidden = !document.getElementById('FIELDSET_CAM_CON').hidden;
-																								document.getElementById('FIELDSET_NOTES').hidden = !document.getElementById('FIELDSET_NOTES').hidden;">show/hide Information</button>
-
-			<fieldset id="FIELDSET_CAM_CON" hidden>
-				<legend>Camera Controls</legend>
-
-					Click inside canvas to enable mouse controlled first-person view. Move with W, A, S and D.
-					Use SpaceBar to accend and C to decent. Use Mousewheel to increase or decrease movement speed. </br>
-					Exit the view control by pressing Esc.
-
-				</fieldset>
-
-			<td>
-
-		</tr>
-
-		<tr>
-
-		<td colspan="2">
-
-			<fieldset id="FIELDSET_NOTES" hidden>
-				<legend>Notes</legend>
-
-					When opening files, a set of color, depth and binary segmentation data has to be loaded together.
-					The files have several identifiers in their names. </br>
-					"&ltfilename&gt_&ltalpha&gt_&ltbeta&gt_&ltcolor/depth/seg&gt.&ltpng/jpg/bin&gt" The &ltfilename&gt is abitrary and alpha and beta
-					describe the relative location in degrees.
-
-				</fieldset>
-
-			<td>
-
-		</tr>
-
 	</table>
+	
 
 </body>
 

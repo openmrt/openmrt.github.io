@@ -17,10 +17,10 @@ class APP_LoadedActions{
 		document.getElementById("PROGRESS_GLOBAL").value = 0;
 
 		//initialize camera and controls
-		var camera = new APP_Camera(45, (1024/512), 0.01, 1000, new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,-1));
+		var camera = new APP_Camera(45, (512/512), 0.01, 1000, new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,-1));
 
 		//initialize renderer
-		APP_GlobalData.renderer = new APP_Renderer("CANVAS", 1024, 512, camera);
+		APP_GlobalData.renderer = new APP_Renderer("CANVAS", 512, 512, camera);
 		APP_GlobalData.renderer.clear();
 
 		//init sun
