@@ -16,25 +16,27 @@ class APP_InputActions{
 		APP_Parser.parseAndLoadInputFiles(evt.target.files, APP_LoadedActions.fileInputChanged);
 	}
 
-	static displayMeshChanged(){
+    static displayModeChanged() {
+        const displayMode = document.getElementById("DISPLAY_MODE").value;
 
-		APP_GlobalData.display 		= APP_GlobalData.DISPLAY_MESH;
-		APP_GlobalData.inputLocked 	= false;
+        switch (displayMode) {
+            case "mesh":
+                APP_GlobalData.display = APP_GlobalData.DISPLAY_MESH;
+                APP_GlobalData.inputLocked = false;
+                APP_GlobalData.renderer.setShader(APP_GlobalData.SHADER_ID_TRIANGLES_SHADOW);
+                break;
+            case "shadowmap":
+                APP_GlobalData.display = APP_GlobalData.DISPLAY_SHADOWMAP;
+                APP_GlobalData.inputLocked = true;
+                APP_GlobalData.renderer.setShader(APP_GlobalData.SHADER_ID_SHADOWMAP);
+                break;
+            default:
+                console.error("Unknown display mode:", displayMode);
+                return;
+        }
 
-		APP_GlobalData.renderer.setShader(APP_GlobalData.SHADER_ID_TRIANGLES_SHADOW);
-		APP_GlobalData.renderer.invalidateShadowMap();
-
-	}
-
-	static displayShadowMapChanged(){
-
-		APP_GlobalData.display 		= APP_GlobalData.DISPLAY_SHADOWMAP;
-		APP_GlobalData.inputLocked 	= true;
-
-		APP_GlobalData.renderer.setShader(APP_GlobalData.SHADER_ID_SHADOWMAP);
-		APP_GlobalData.renderer.invalidateShadowMap();
-
-	}
+        APP_GlobalData.renderer.invalidateShadowMap();
+    }
 
 	static sliderTDTChanged(evt){
 		APP_GlobalData.TDT = evt.target.value;

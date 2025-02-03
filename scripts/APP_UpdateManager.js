@@ -25,11 +25,12 @@ class APP_UpdateManager{
 		APP_GlobalData.interpFacDif 	= document.getElementById("SLIDER_DIFFUSE").value;
 		APP_GlobalData.interpFacSdw 	= document.getElementById("SLIDER_SHADOW").value;
 
-		if(document.getElementById("RADIO_DISPLAY_MESH").checked){
-			APP_GlobalData.display = APP_GlobalData.DISPLAY_MESH;
-		}else if(document.getElementById("RADIO_DISPLAY_SHADOWMAP").checked){
-			APP_GlobalData.display = APP_GlobalData.DISPLAY_SHADOWMAP;
-		}
+        const displayMode = document.getElementById("DISPLAY_MODE").value;
+        if(displayMode === "mesh"){
+            APP_GlobalData.display = APP_GlobalData.DISPLAY_MESH;
+        }else if(displayMode === "shadowmap"){
+            APP_GlobalData.display = APP_GlobalData.DISPLAY_SHADOWMAP;
+        }
 
 	}
 
