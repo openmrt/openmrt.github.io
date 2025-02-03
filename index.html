@@ -9,30 +9,29 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
-	<script type='text/javascript' charset='utf-8' src='scripts/main.js'></script>
-	<script type='text/javascript' charset='utf-8' src='scripts/APP_GlobalData.js'></script>
-	<script type='text/javascript' charset='utf-8' src='scripts/APP_InputActions.js'></script>
-	<script type='text/javascript' charset='utf-8' src='scripts/APP_LoadedActions.js'></script>
-	<script type='text/javascript' charset='utf-8' src='scripts/APP_Loader.js'></script>
-	<script type='text/javascript' charset='utf-8' src='scripts/APP_Renderer.js'></script>
-	<script type='text/javascript' charset='utf-8' src='scripts/objects/APP_CameraControls.js'></script>
-	<script type='text/javascript' charset='utf-8' src='scripts/APP_InputDeviceHandler.js'></script>
-	<script type='text/javascript' charset='utf-8' src='scripts/APP_Util.js'></script>
-	<script type='text/javascript' charset='utf-8' src='scripts/APP_ImageProcessor.js'></script>
-	<script type='text/javascript' charset='utf-8' src='scripts/APP_Parser.js'></script>
-	<script type='text/javascript' charset='utf-8' src='scripts/APP_UpdateManager.js'></script>
-	<script type='text/javascript' charset='utf-8' src='scripts/APP_Geometry.js'></script>
-	<script type='text/javascript' charset='utf-8' src='scripts/APP_Scheduler.js'></script>
-	<script type='text/javascript' charset='utf-8' src='scripts/objects/APP_RawImageStorage.js'></script>
-	<script type='text/javascript' charset='utf-8' src='scripts/objects/APP_Mesh.js'></script>
-	<script type='text/javascript' charset='utf-8' src='scripts/objects/APP_Camera.js'></script>
-	<script type='text/javascript' charset='utf-8' src='scripts/objects/APP_Image.js'></script>
-	<script type='text/javascript' charset='utf-8' src='scripts/APP_DepthImageFilter.js'></script>
+    <script type='text/javascript' charset='utf-8' src='scripts/main.js'></script>
+    <script type='text/javascript' charset='utf-8' src='scripts/APP_GlobalData.js'></script>
+    <script type='text/javascript' charset='utf-8' src='scripts/APP_InputActions.js'></script>
+    <script type='text/javascript' charset='utf-8' src='scripts/APP_LoadedActions.js'></script>
+    <script type='text/javascript' charset='utf-8' src='scripts/APP_Loader.js'></script>
+    <script type='text/javascript' charset='utf-8' src='scripts/APP_Renderer.js'></script>
+    <script type='text/javascript' charset='utf-8' src='scripts/objects/APP_CameraControls.js'></script>
+    <script type='text/javascript' charset='utf-8' src='scripts/APP_InputDeviceHandler.js'></script>
+    <script type='text/javascript' charset='utf-8' src='scripts/APP_Util.js'></script>
+    <script type='text/javascript' charset='utf-8' src='scripts/APP_ImageProcessor.js'></script>
+    <script type='text/javascript' charset='utf-8' src='scripts/APP_Parser.js'></script>
+    <script type='text/javascript' charset='utf-8' src='scripts/APP_UpdateManager.js'></script>
+    <script type='text/javascript' charset='utf-8' src='scripts/APP_Geometry.js'></script>
+    <script type='text/javascript' charset='utf-8' src='scripts/APP_Scheduler.js'></script>
+    <script type='text/javascript' charset='utf-8' src='scripts/objects/APP_RawImageStorage.js'></script>
+    <script type='text/javascript' charset='utf-8' src='scripts/objects/APP_Mesh.js'></script>
+    <script type='text/javascript' charset='utf-8' src='scripts/objects/APP_Camera.js'></script>
+    <script type='text/javascript' charset='utf-8' src='scripts/objects/APP_Image.js'></script>
+    <script type='text/javascript' charset='utf-8' src='scripts/APP_DepthImageFilter.js'></script>
 
+    <script type='text/javascript' charset='utf-8' src='lib/three.min.js'></script>
 
-	<script type='text/javascript' charset='utf-8' src='lib/three.min.js'></script>
-	
-	<script type='text/vertexShader' charset='utf-8' id="vertexShader_SHADOWMAP">
+    <script type='text/vertexShader' charset='utf-8' id="vertexShader_SHADOWMAP">
 		precision mediump float;
 
 		//attributes
@@ -404,25 +403,151 @@
 
 	</script>
 
+    <script>
+        const imageSets = {
+            'campus01': {
+                name: 'Campus 01',
+                coord: '33.4181949461328_-111.93639738052673',
+            },
+            'campus02': {
+                name: 'Campus 02',
+                coord: '33.4183728453994_-111.93567966621788'
+            },
+            'campus03': {
+                name: 'Campus 03',
+                coord: '33.41811902004326_-111.93565815212628'
+            },
+            'campus04': {
+                name: 'Campus 04',
+                coord: '33.41838947276037_-111.93597659957112'
+            },
+            'campus05': {
+                name: 'Campus 05',
+                coord: '33.41915095595469_-111.93557105423531'
+            },
+            'campus06': {
+                name: 'Campus 06',
+                coord: '33.41933375114005_-111.9353332688242'
+            },
+            'campus07': {
+                name: 'Campus 07',
+                coord: '33.41960380498431_-111.93535591863468'
+            },
+            'dataset01': {
+                name: 'Google 01',
+                coord: '40.86782808023474_-74.61032500447362'
+            },
+            'dataset02': {
+                name: 'Google 02',
+                coord: '40.8618055232701_-74.61086303316358'
+            },
+            'dataset03': {
+                name: 'Google 03',
+                coord: '40.87978941725869_-74.61170716427404'
+            },
+            'dataset04': {
+                name: 'Google 04',
+                coord: '40.84108587165181_-74.61086932700971'
+            },
+            'dataset05': {
+                name: 'Google 05',
+                coord: '40.85508560632436_-74.61331313383982'
+            },
+        };
+
+        let orderedFiles = [];
+
+        APP_InputActions.imageSetChanged = function() {
+            const imageSet = document.getElementById('IMAGE_SET').value;
+            const galleryPreview = document.getElementById('GALLERY_PREVIEW');
+            galleryPreview.innerHTML = '';
+
+            const coordinates = imageSets[imageSet].coord;
+            if (!coordinates) {
+                console.error('Coordinates not found for image set:', imageSet);
+                return;
+            }
+            const basePath = `./data/${imageSet}/`;
+            const viewAngles = [
+                `${coordinates}_0_0`,
+                `${coordinates}_180_0`,
+                `${coordinates}_270_0`,
+                `${coordinates}_90_0`,
+                `${coordinates}_0_90`,
+                `${coordinates}_0_270`
+            ];
+
+            const colorPromises = viewAngles.map(angle => fetch(`${basePath}${angle}_color.png`).then(res => res.blob()));
+            const depthPromises = viewAngles.map(angle => fetch(`${basePath}${angle}_depth.png`).then(res => res.blob()));
+            const segPromises = viewAngles.map(angle => fetch(`${basePath}${angle}_seg.bin`).then(res => res.blob()));
+
+            Promise.all([...colorPromises, ...depthPromises, ...segPromises])
+                .then(blobs => {
+                    const colorBlobs = blobs.slice(0, viewAngles.length);
+                    const depthBlobs = blobs.slice(viewAngles.length, viewAngles.length * 2);
+                    const segBlobs = blobs.slice(viewAngles.length * 2);
+
+                    orderedFiles = [
+                        ...colorBlobs.map((blob, index) => new File([blob], `${viewAngles[index]}_color.png`)),
+                        ...depthBlobs.map((blob, index) => new File([blob], `${viewAngles[index]}_depth.png`)),
+                        ...segBlobs.map((blob, index) => new File([blob], `${viewAngles[index]}_seg.bin`))
+                    ];
+                })
+                .catch(error => console.error('Error loading files:', error));
+
+            viewAngles.forEach(angle => {
+                const img = document.createElement('img');
+                img.src = `${basePath}${angle}_color.png`;
+                img.alt = angle;
+                img.className = 'img-thumbnail m-1';
+                img.style.width = '100px';
+                img.style.height = '100px';
+                galleryPreview.appendChild(img);
+            });
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageSetSelect = document.getElementById('IMAGE_SET');
+            imageSetSelect.innerHTML = '';
+
+            Object.keys(imageSets).forEach(key => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = key.replace(/_/g, ' ');
+                imageSetSelect.appendChild(option);
+            });
+            APP_InputActions.imageSetChanged();
+
+            document.getElementById('BUTTON_START_SIMULATION').addEventListener('click', function() {
+                console.log('Simulation started');
+                APP_Loader.loadPixelsOfMultipleImageFiles(orderedFiles, APP_LoadedActions.fileInputChanged);
+            });
+        });
+    </script>
+
 </head>
 <body>
 
     <div class="container mt-2">
         <div class="row justify-content-center">
-            <div class="col-auto">
-                <canvas id="CANVAS" class="bg-light border" style="width: 512px; height: 512px;"></canvas>
+            <div class="col-12 col-md-8 col-lg-6">
+                <canvas id="CANVAS" class="bg-light border w-100" style="height: 512px;"></canvas>
             </div>
         </div>
         <div class="row justify-content-center mt-4">
-            <div class="col-auto">
+            <div class="col-12 col-md-8 col-lg-6">
                 <fieldset>
                     <progress id="PROGRESS_GLOBAL" value="0" max="100" class="w-100"></progress>
                     <legend>Controls</legend>
                     <div class="table-responsive">
                         <table class="table table-borderless">
                             <tr>
-                                <td>Images</td>
-                                <td><input id="FILE_INPUT" type="file" accept="*" multiple class="form-control"></td>
+                                <td>Sun Longitude</td>
+                                <td><input type="range" min="0" value="0" max="6.2831853071" id="SLIDER_SUN_X" step="0.001" class="form-range"></td>
+                            </tr>
+                            <tr>
+                                <td>Sun Latitude</td>
+                                <td><input type="range" min="-1.5707963267" value="0" max="1.5707963267" id="SLIDER_SUN_Y" step="0.001" class="form-range"></td>
                             </tr>
                             <tr><td colspan="2"><hr></td></tr>
                             <tr>
@@ -457,27 +582,40 @@
                             </tr>
                             <tr><td colspan="2"><hr></td></tr>
                             <tr>
-                                <td>Sun Longitude</td>
-                                <td><input type="range" min="0" value="0" max="6.2831853071" id="SLIDER_SUN_X" step="0.001" class="form-range"></td>
+                                <td>Image Set</td>
+                                <td>
+                                    <select id="IMAGE_SET" class="form-select" onChange="APP_InputActions.imageSetChanged()">
+                                    </select>
+                                </td>
                             </tr>
                             <tr>
-                                <td>Sun Latitude</td>
-                                <td><input type="range" min="-1.5707963267" value="0" max="1.5707963267" id="SLIDER_SUN_Y" step="0.001" class="form-range"></td>
+                                <td>Preview</td>
+                                <td>
+                                    <div id="GALLERY_PREVIEW" class="d-flex overflow-auto">
+                                        <!-- Thumbnails will be dynamically inserted here -->
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <button type="button" id="BUTTON_START_SIMULATION" class="btn btn-success w-100">Start Simulation</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Manual Images</td>
+                                <td><input id="FILE_INPUT" type="file" accept="*" multiple class="form-control"></td>
                             </tr>
                             <tr><td colspan="2"><hr></td></tr>
                             <tr>
                                 <td colspan="1"><button type="button" id="BUTTON_SCREENSHOT" class="btn btn-primary w-100">Screenshot</button></td>
                                 <td colspan="1"><button type="button" id="BUTTON_EXPORT_SHADOWS" class="btn btn-secondary w-100">Export Shadows</button></td>
                             </tr>
-                            <tr><td colspan="2"><hr></td></tr>
-
                         </table>
                     </div>
                 </fieldset>
             </div>
         </div>
     </div>
-	
 
 </body>
 
